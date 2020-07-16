@@ -1,6 +1,6 @@
 #! /bin/bash
 echo "============TIE TAC TOE ==============="
-boardElements;
+define -a boardElements;
 
 function resetBoard(){
    for((row=1;row<=3;row++))
