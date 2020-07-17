@@ -22,20 +22,20 @@ function selectPlayer(){
 }
 
 function assignLetters(){
-	playerLetter=O
+	playerLetter=O;computerLetter=O;
 	if [[ $1 =~ $playerLetter  ]]
 	then
 		computerLetter=X;
 	else
-		playerLetter=O;
+		playerLetter=X;
 	fi
 	echo "player letter : $playerLetter and computer letter : $computerLetter"
 }
 
 function selectLetter(){
 	case $((RANDOM%2)) in
-		0) echo "O";;
-		1) echo "X";;
+		0) letter=O;;
+		1) letter=X;;
 	esac
 }
 
@@ -62,7 +62,7 @@ function checkPosition(){
 
 function playerInputCheck(){
 	displayBoard;
-	assignLetters $selectLetter
+	assignLetters $selectLetter;
 	read -p "enter the position in the matrix:" rowPosition columnPosition
 	checkPosition $rowPosition $columnPosition
 }
