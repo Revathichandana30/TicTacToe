@@ -23,8 +23,7 @@ function selectPlayer(){
 
 function assignLetters(){
 	playerLetter=O;computerLetter=O;
-	selectLetter;
-	if [[ $letter =~ $playerLetter  ]]
+	if [[ $1 =~ $playerLetter  ]]
 	then
 		computerLetter=X;
 	else
@@ -63,7 +62,7 @@ function checkPosition(){
 
 function playerInputCheck(){
 	displayBoard;
-	assignLetters $selectLetter
+	assignLetters $selectLetter;
 	read -p "enter the position in the matrix:" rowPosition columnPosition
 	checkPosition $rowPosition $columnPosition
 }
