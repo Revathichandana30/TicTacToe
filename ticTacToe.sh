@@ -139,5 +139,21 @@ function playerInputCheck(){
 		playerInputCheck;
 	fi
 }
+
+function checkPosition(){
+	if [[ ($1 -gt 0) && ($1 -le 3) && ($2 -gt 0) && ($2 -le 3) ]]
+	then
+		echo "valid input"
+	else
+		echo "invalid input"
+	fi
+}
+
+function playerInputCheck(){
+	displayBoard;
+	assignLetters $selectLetter;
+	read -p "enter the position in the matrix:" rowPosition columnPosition
+	checkPosition $rowPosition $columnPosition
+}
 resetBoard
 playerInputCheck
