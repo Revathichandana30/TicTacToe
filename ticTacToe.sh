@@ -1,8 +1,7 @@
 #! /bin/bash
 echo "============TIE TAC TOE ==============="
 declare -a boardElements
-PLAYER_LETTER=O;
-COMPUTER_LETTER=O;
+
 function resetBoard(){
 	for((row=1;row<=3;row++))
 	do
@@ -23,13 +22,14 @@ function selectPlayer(){
 }
 
 function assignLetters(){
+	playerLetter=O;computerLetter=O;
 	if [[ $1 =~ $playerLetter  ]]
 	then
-		COMPUTER_LETTER=X;
+		computerLetter=X;
 	else
-		PLAYER_LETTER=X;
+		playerLetter=X;
 	fi
-	echo "player letter : $PLAYER_LETTER and computer letter : $COMPUTER_LETTER"
+	echo "player letter : $playerLetter and computer letter : $computerLetter"
 }
 
 function selectLetter(){
@@ -132,7 +132,7 @@ function playerInputCheck(){
 	checkValid=`checkPosition $rowPosition $columnPosition`
 	if [[ $checkValid -eq 1 ]]
 	then
-		boardElements[$rowPosition$columnPosition]=$PLAYER_LETTER;
+		boardElements[$rowPosition$columnPosition]=$playerLetter;
 		displayBoard;
 		checkCondition $winCheck $tieCheck $checkPOsition;
 	else
