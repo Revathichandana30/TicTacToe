@@ -1,70 +1,73 @@
 #! /bin/bash
 echo "============TIE TAC TOE ==============="
-declare -a boardElements
+ROW_SIZE=3
+BOARD_SIZE=$((ROW_SIZE*ROW_SIZE))
+Position=0
+userSymbol="0"
+compSymbol="0"
+declare -A board
 
 function resetBoard(){
-	for((row=1;row<=3;row++))
+	for (( position=1; position<=$BOARD_SIZE; position++ ))
 	do
-		for((column=1;column<=3;column++))
-		do
-         boardElements[$row$column]="-";
-		done
-   done
+		ticBoard[$position]=0
+	done
 }
 
-function selectPlayer(){
-	case $((RANDOM%2)) in
-		0) echo "persons starts the gamme";
-			startPerson=player;;
-		1) echo "computer Starts the game";
-			startPerson=computer;;
-	esac
+function randomGenerator() {
+	randomCheck=$((RANDOM%2))
 }
 
-function assignLetters(){
-	playerLetter=O;computerLetter=O;
-	if [[ $1 =~ $playerLetter  ]]
+function assignSymbol(){
+	randomGenerator
+	if [ "$randomCheck" == "$userSymbol" ]
 	then
-		computerLetter=X;
+		userSymbol="X"
 	else
-		playerLetter=X;
+		compSymbol="X"
 	fi
-	echo "player letter : $playerLetter and computer letter : $computerLetter"
+	echo "Player Symbol is $userSymbol and Computer_Symbol is $compSymbol "
+
 }
 
-function selectLetter(){
-	case $((RANDOM%2)) in
-		0) letter=O;;
-		1) letter=X;;
+function tossFirstPlayer(){
+	case $(($RANDOM%2)) in
+		0)	firstPlayer=human
+			echo "HUMAN has won the Toss";;
+		1) firstPlayer=Computer
+			echo "COMPUTER has won the Toss";;
 	esac
 }
 
 function displayBoard(){
-	for((row=1;row<=3;row++))
+   for (( count=1; count<=$BOARD_SIZE; count++ ))
    do
-   	for((column=1;column<=3;column++))
-      do
-         printf "| ${boardElements[$row$column]} |"
-      done
-      echo -e "\n-------------- "
-   done
-
+	   if [[ "${board[$count]}" -eq "0" ]]
+      then
+   	   printf _"|"
+      else
+         printf ${board[$count]}" "
+      fi
+      if [ $(( $count % $ROW_SIZE )) -eq 0 ]
+      then
+      	echo
+      fi
+	done
 }
 
-function checkPosition(){
-	if [[ ($1 -gt 0) && ($1 -le 3) && ($2 -gt 0) && ($2 -le 3) ]]
+playerInputChecker(){
+	checker=false
+	displayBoard
+	assignSymbol
+	echo "Choose a cell for your $userSymbol "
+	read -p "Enter the choice in range 1 - $BOARD_SIZE : " inputPosition
+
+	if [ $inputPosition -gt 0 -a $inputPosition -le $BOARD_SIZE ]
 	then
-		echo "valid input"
+		echo "Valid choice  $inputPosition in range"
 	else
-		echo "invalid input"
+		echo "Invalid position out of range"
 	fi
-}
 
-function playerInputCheck(){
-	displayBoard;
-	assignLetters $selectLetter;
-	read -p "enter the position in the matrix:" rowPosition columnPosition
-	checkPosition $rowPosition $columnPosition
 }
-resetBoard
-playerInputCheck
+playerInputChecker
