@@ -60,6 +60,7 @@ function rowCrossed(){
 			echo 1;break;
 		fi
 	done
+	echo 0
 }
 
 function columnCrossed(){
@@ -71,6 +72,7 @@ function columnCrossed(){
          echo 1;break;
 		fi
    done
+	echo 0
 }
 
 function diagonalCrossed(){
@@ -82,6 +84,7 @@ function diagonalCrossed(){
    then
       echo 1;break;
    fi
+	echo 0
 }
 
 function winCheck(){
@@ -90,6 +93,7 @@ function winCheck(){
 	then
 		echo 1;
 	fi
+	echo 0
 }
 
 function tieCheck(){
@@ -103,6 +107,7 @@ function tieCheck(){
 			fi
 		done
 	done
+	echo 0
 }
 
 function checkPosition(){
@@ -121,25 +126,54 @@ function checkCondition(){
 	elif [[ $2 -eq 1 ]]
 	then
 		echo "tie";exit;
-	else
-		echo "change turn"
+	elif [[ $3 -eq 1 ]]
+	then
+		echo 1;
 	fi
 }
-
-function playerInputCheck(){
-	displayBoard;
-	assignLetters $selectLetter;
+function userPlay(){
+	displayBoard
 	read -p "enter the position in the matrix:" rowPosition columnPosition
 	checkValid=`checkPosition $rowPosition $columnPosition`
-	if [[ $checkValid -eq 1 ]]
+	if [[ ($checkValid -eq 1) && (${boardElements[$rowPosition$columnPosition]} =~ ^([-])$) ]]
 	then
 		boardElements[$rowPosition$columnPosition]=$playerLetter;
-		displayBoard;
-		checkCondition $winCheck $tieCheck $checkPOsition;
+		changePositon=`checkCondition $winCheck $tieCheck $checkValid`;
 	else
-		playerInputCheck;
+		echo "not valid and try again";
+	fi
+	if [[ $changePosition -eq 1 ]]
+	then
+		computerPlay
+	else
+		userPlay
 	fi
 }
+function computerPlay(){
+	row=$((1+$(($RANDOM%3))));column=$((1+$(($RANDOM%3))));
+	if [[ ${boardElements[$row$column]} =~ ^([-])$ ]]
+   then
+		boardElements[$row$column]=$computerLetter;
+   	changePosition=`checkCondition $winCheck $tieCheck $checkPosition`;
+	else
+		computerPlay
+	fi
+	if [[ $changePosition -eq 1 ]]
+   then
+      userPlay
+   fi
 
-resetBoard
-playerInputCheck
+}
+
+function startGame(){
+	count=0;
+	resetBoard;
+	selectPlayer;
+	assignLetters $selectLetter;
+	case $startPerson in
+		player) userPlay;;
+		computer) computerPlay;;
+	esac
+}
+startGame
+
