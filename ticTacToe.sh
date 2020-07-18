@@ -1,25 +1,25 @@
 #! /bin/bash
 echo "============TIE TAC TOE ==============="
-boardElements=( 1 2 3 4 5 6 7 8 9 )
-function resetBoard(){
-   for((row=1;row<=3;row++))
-   do
-      for((column=1;column<=3;column++))
-      do
-         boardElements[$row$column]="-";
-         printf "| ${boardElements[$row$column]} |"
-      done
-      echo -e "\n------------ "
-   done
+ROW_SIZE=3
+BOARD_SIZE=$((ROW_SIZE*ROW_SIZE))
+Position=0
+declare -A ticBoard
+
+function resetBoard() {
+	for (( position=1; position<=$BOARD_SIZE; position++ ))
+	do
+		ticBoard[$position]=0
+	done
 }
 
-selectPlayer(){
-	case $((RANDOM%2)) in
-		0) echo "player starts game";
-			startPerson=player;;
-		1) echo "computer starts game";
-			startPerson=computer;;
+function tossFirstPlayer(){
+	case $(($RANDOM%2)) in
+		0)	firstPlayer=human
+			echo "HUMAN has won the Toss";;
+		1) firstPlayer=Computer
+			echo "COMPUTER has won the Toss";;
 	esac
+
 }
-resetBoard
-selectPlayer
+
+tossFirstPlayer
