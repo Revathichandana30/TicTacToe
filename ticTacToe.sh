@@ -1,15 +1,13 @@
 #! /bin/bash
 echo "============TIE TAC TOE ==============="
-define -a boardElements;
-function resetBoard(){
-	for((row=1;row<=3;row++))
+ROW_SIZE=3
+BOARD_SIZE=$((ROW_SIZE*ROW_SIZE))
+Position=0
+declare -a ticBoard
+
+function resetBoard() {
+	for (( position=1; position<=$BOARD_SIZE; position++ ))
 	do
-		for((column=1;column<=3;column++))
-		do
-			boardElements[$row$column]="-";
-			printf "| ${boardElements[$row$column]} | "
-		done
-		echo -e "\n------------------ "
+		ticBoard[$position]=0
 	done
 }
-resetBoard
