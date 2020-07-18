@@ -1,44 +1,42 @@
 #! /bin/bash
 echo "============TIE TAC TOE ==============="
-declare -a boardElements
+ROW_SIZE=3
+BOARD_SIZE=$((ROW_SIZE*ROW_SIZE))
+Position=0
+userSymbol="0"
+compSymbol="0"
+declare -A board
 
-function resetBoard(){
-	for((row=1;row<=3;row++))
+function resetBoard() {
+	for (( position=1; position<=$BOARD_SIZE; position++ ))
 	do
-		for((column=1;column<=3;column++))
-		do
-         boardElements[$row$column]="-";
-		done
-   done
+		ticBoard[$position]=0
+	done
+}
+function randomGenerator() {
+	randomCheck=$((RANDOM%2))
 }
 
-function selectPlayer(){
-	case $((RANDOM%2)) in
-		0) echo "persons starts the gamme";
-			startPerson=player;;
-		1) echo "computer Starts the game";
-			startPerson=computer;;
-	esac
-}
-
-function assignLetters(){
-	playerLetter=O;computerLetter=O
-	selectLetter
-	if [[ $letter =~ $playerLetter  ]]
+function assignSymbol(){
+	randomGenerator
+	if [ "$randomCheck" == "$userSymbol" ]
 	then
-		computerLetter=X;
+		userSymbol="X"
 	else
-		playerLetter=X;
+		compSymbol="X"
 	fi
-	echo "player letter : $playerLetter and computer letter : $computerLetter"
+	echo "Player Symbol is $userSymbol and Computer_Symbol is $compSymbol "
+
 }
 
-function selectLetter(){
-	case $((RANDOM%2)) in
-		0) letter=O;;
-		1) letter=X;;
+function tossFirstPlayer(){
+	case $(($RANDOM%2)) in
+		0)	firstPlayer=human
+			echo "HUMAN has won the Toss";;
+		1) firstPlayer=Computer
+			echo "COMPUTER has won the Toss";;
 	esac
 }
-resetBoard
-selectPlayer
-assignLetters
+
+tossFirstPlayer
+assignSymbol
