@@ -34,7 +34,7 @@ function tossFirstPlayer(){
 	case $(($RANDOM%2)) in
 		0)	firstPlayer=human
 			echo "HUMAN has won the Toss";;
-		1) firstPlayer=Computer
+		1)	firstPlayer=Computer
 			echo "COMPUTER has won the Toss";;
 	esac
 }
@@ -55,13 +55,12 @@ function displayBoard(){
 	done
 }
 
-playerInputChecker(){
+function playerInputChecker(){
 	checker=false
 	displayBoard
 	assignSymbol
 	echo "Choose a cell for your $userSymbol "
 	read -p "Enter the choice in range 1 - $BOARD_SIZE : " inputPosition
-
 	if [ $inputPosition -gt 0 -a $inputPosition -le $BOARD_SIZE ]
 	then
 		echo "Valid choice  $inputPosition in range"
