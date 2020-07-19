@@ -1,176 +1,210 @@
 #! /bin/bash
 echo "============TIE TAC TOE ==============="
 ROW_SIZE=3
-BOARD_SIZE=$((ROW_SIZE*ROW_SIZE))
-Position=0
-userSymbol="0"
-compSymbol="0"
+BOARD_SIZE=$(($ROW_SIZE*$ROW_SIZE))
+userSymbol="O"
+compSymbol="O"
+quit=false
+validator=false
+position=0
+count=0
 declare -A board
 
-function resetBoard() {
-	for (( position=1; position<=$BOARD_SIZE; position++ ))
+function resetBoard(){
+	position=0
+   for (( position=1; position<=$BOARD_SIZE ; position++ )) 
 	do
-		board[$position]=0
-	done
-}
-
-function randomGenerator() {
-	randomCheck=$((RANDOM%2))
-}
-
-function assignSymbol(){
-	randomGenerator
-	if [ "$randomCheck" == "$userSymbol" ]
-	then
-		userSymbol="X"
-	else
-		compSymbol="X"
-	fi
-	echo "Player Symbol is $userSymbol and Computer_Symbol is $compSymbol "
-
-}
-
-function tossFirstPlayer(){
-	case $(($RANDOM%2)) in
-		0)	firstPlayer=human
-			echo "HUMAN has won the Toss";;
-		1)	firstPlayer=Computer
-			echo "COMPUTER has won the Toss";;
-	esac
+ 		board[$position]=0
+   done
 }
 
 function displayBoard(){
-	for (( count=1; count<=$BOARD_SIZE; count++ ))
-   do
-   	if [[ "${board[$count]}" -eq "0" ]]
-      then
-   	   printf _"|"
-      else
-         printf ${board[$count]}" "
-      fi
-      if [ $(( $count % $ROW_SIZE )) -eq 0 ]
-      then
-      	echo
-      fi
-	done
-}
-
-function playerInputChecker(){
-	restBoard
-	assignSymbol
-	validator=false
-	while [ $validator -eq false ]
-	do
-	displayBoard
-	echo "Choose a cell for your $userSymbol "
-	read -p "Enter the choice in range 1 - $BOARD_SIZE : " inputPosition
-	if [ $inputPosition -gt 0 -a $inputPosition -le $BOARD_SIZE ]
-	then
-		echo "Valid choice  $inputPosition in range"
-		validator=true
-		if [ validator -eq true -a ${board[$index]} -eq 0 ]
-		then
-			board[inputPosition]=$userSymbol
-		fi
-	else
-		echo "Invalid position out of range"
-	fi
-	done
-}
-
-function columnChecker(){
 	count=0
-	for(( column=1; column<=$ROW_SIZE; column++ ))
+   for (( count=1; count<=$BOARD_SIZE ; count++ ))
 	do
-		for(( row=0; row<=$ROW_SIZE; row++ ))
-		do
-				index=$(($ROW_SIZE*row+column))
-				if [ ${board[$index]}==$1 ]
-				then
-					(( count++ ))
-				fi
-		done
-		if [ $count -eq $ROW_SIZE ]
-		then
-			winner $1
-			quit=true
-		fi
+	if [ "${board[$count]}" == "0" ]
+   then
+   	printf  _" "
+   else
+   	printf ${board[$count]}" "
+   fi
+   if [ $(( $count % $ROW_SIZE )) -eq 0 ]
+   then
+   	echo
+   fi
+   done
+}
+
+function assignSymbol(){
+	randomVariable=$((RANDOM%2))
+   if [ $randomVariable -eq 0 ]
+   then
+	   userSymbol="X"
+   else
+      compSymbol="X"
+	fi
+   echo "Your sign is "$userSymbol" and computer sign is "$compSymbol
+}
+
+function toss(){
+	randomVariable=$((RANDOM%2))
+   if [ $randomVariable -eq 0 ]
+   then
+   	echo User turn first
+      firstPlay=user
+   else
+   	echo Computer turn first
+      firstPlay=computer
+   fi
+}
+
+function validPositionChecker(){
+	if [ $1 -gt 0  -a $1 -le $BOARD_SIZE ]
+   then
+   	validator=true
+   fi
+   if [ "$validator" == "true" -a "${board[$1]}" == "0" ]
+   then
+   	board[$1]=$2
+   else
+      validator=false
+   fi
+}
+
+function computerPlays(){
+	while [ "$validator" == "false" ]
+   do
+	   number=$((RANDOM%9+1))
+      validPositionChecker $number $compSymbol
+   done
+   validator=false
+}
+
+function userPlays(){
+	while [ "$validator" == "false" ]
+   do
+   	read -p "Please enter the number between 1-9 where insert your $userSymbol in board " input;
+      validPositionChecker $input $userSymbol
+      if [ "$validator" == "false" ]
+      then
+			echo Input not accepted please try again
+      fi
 	done
+   validator=false
+}
+
+function diagonalEndingTopLeft(){
+	count=0
+   increase_by=$((ROW_SIZE+1))
+   for (( position=1; position <= $BOARD_SIZE; position+=$((ROW_SIZE+1)) ))
+   do
+   	if [ ${board[$position]} == $1 ]
+      then
+      	((count++))
+      fi
+	done
+   if [ $count -eq $ROW_SIZE ]
+   then
+   	winnerDisplay $1
+      quit=true
+   fi
+}
+
+function diagonalEndingTopRight(){
+	count=0
+   for (( position=$ROW_SIZE; position <= $((BOARD_SIZE+1-ROW_SIZE)); position+=$((ROW_SIZE-1)) )) do
+		if [ ${board[$position]} == $1 ]
+      then
+      	((count++))
+      fi
+	done
+   if [ $count == $ROW_SIZE ]
+   then
+   	winnerDisplay $1
+      quit=true
+   fi
 }
 
 function rowChecker(){
 	count=0
-   for(( row=0; row<=$ROW_SIZE; row++ ))
-   do
-		for(( column=1; column<=$ROW_SIZE; column++ ))
-      do
-      	index=$(($ROW_SIZE*row+column))
-         if [ ${board[$index]}==$1 ]
+   position=0
+   for (( row=0;row<$ROW_SIZE;row++ )) do
+   	count=0
+      for (( col=1; col<=$ROW_SIZE; col++ )) do
+	      position=$(($ROW_SIZE*row+col ))
+         if [ ${board[$position]} == $1 ]
+         then
+   	      (( count++ ))
+         fi
+      done
+      if [ $count -eq $ROW_SIZE ]
+      then
+      	winnerDisplay $1
+         break
+      fi
+	done
+   if [ $count -eq $ROW_SIZE ]
+   then
+   	quit=true
+   fi
+}
+
+function columnChecker(){
+	count=0
+   position=0
+   for (( col=1;col<=$ROW_SIZE;col++ )) do
+   	count=0
+      for (( row=0; row<=$ROW_SIZE; row++ )) do
+      	position=$(($ROW_SIZE*row+col ))
+         if [ "${board[$position]}" == "$1" ]
          then
          	(( count++ ))
          fi
       done
       if [ $count -eq $ROW_SIZE ]
       then
-      	winner $1
-         quit=true
+      	winnerDisplay $1
+         break
       fi
 	done
+   if [ $count -eq $ROW_SIZE ]
+   then
+   	quit=true
+   fi
 }
 
-function diagonalEndingTopRight(){
-	for (( position=1; position<=$BOARD_SIZE; position+=$((ROW_SIZE+1)) ))
-	do
-		if [ ${board[$position]} -eq $1 ]
-		then
-			((count++))
-		fi
-	done
-	if [ $count -eq $ROW_SIZE ]
-	then
-		winner $1
-		quit=true
-	fi
-}
-
-function diagonalEndingTopLeft(){
-	for (( position=$ROW_SIZE; position<=$((BOARD_SIZE+1-ROW_SIZE)); position+=$((ROW_SIZE-1)) ))
-	do
-		if [ ${board[$position]} -eq $1 ]
-		then
-			((count++))
-		fi
-	done
-	if [ $count -eq $BOARD_SIZE ]
-	then
-		winner $1
-		quit=true
-	fi
-
-}
-
-function winnerChecker(){
-	columnChecker $1
-	rowChecker $1
-	diagonalEndingTopRight $1
+function winnerCheck(){
 	diagonalEndingTopLeft $1
+   diagonalEndingTopRight $1
+   rowChecker $1
+   columnChecker $1
 }
 
-function staticSign(){
-	echo $1
-	winner $1
+function winnerDisplay(){
+	if [ $1 == $userSymbol ]
+   then
+   	echo "User Wins the game"
+   else
+      echo "Computer wins the game"
+   fi
 }
 
-function winner(){
-	if [ $1 -eq $userSymbol ]
-	then
-		echo "USER WINS the game"
-	else
-		echo "COMPUTER WINS the Game"
-	fi
+function ticTacToeApplication(){
+	resetBoard
+   assignSymbol
+   toss
+   while [ $quit == false ]
+   do
+   	validator=false
+      displayBoard
+      userPlays $firstPlay
+      validator=false
+      winnerCheck $userSymbol
+      computerPlays $firstPlay
+      winnerCheck $compSymbol
+	done
+   displayBoard
 }
 
-execute=$( staticSign $userSymbol )
-echo $execute
-
+ticTacToeApplication
 
