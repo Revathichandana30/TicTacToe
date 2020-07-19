@@ -1,145 +1,210 @@
 #! /bin/bash
 echo "============TIE TAC TOE ==============="
-declare -a boardElements
+ROW_SIZE=3
+BOARD_SIZE=$(($ROW_SIZE*$ROW_SIZE))
+userSymbol="O"
+compSymbol="O"
+quit=false
+validator=false
+position=0
+count=0
+declare -A board
 
 function resetBoard(){
-	for((row=1;row<=3;row++))
+	position=0
+   for (( position=1; position<=$BOARD_SIZE ; position++ )) 
 	do
-		for((column=1;column<=3;column++))
-		do
-         boardElements[$row$column]="-";
-		done
+ 		board[$position]=0
    done
-}
-
-function selectPlayer(){
-	case $((RANDOM%2)) in
-		0) echo "persons starts the gamme";
-			startPerson=player;;
-		1) echo "computer Starts the game";
-			startPerson=computer;;
-	esac
-}
-
-function assignLetters(){
-	playerLetter=O;computerLetter=O;
-	if [[ $1 =~ $playerLetter  ]]
-	then
-		computerLetter=X;
-	else
-		playerLetter=X;
-	fi
-	echo "player letter : $playerLetter and computer letter : $computerLetter"
-}
-
-function selectLetter(){
-	case $((RANDOM%2)) in
-		0) letter=O;;
-		1) letter=X;;
-	esac
 }
 
 function displayBoard(){
-	for((row=1;row<=3;row++))
-   do
-   	for((column=1;column<=3;column++))
-      do
-         printf "| ${boardElements[$row$column]} |"
-      done
-      echo -e "\n-------------- "
-   done
-
-}
-
-function rowCrossed(){
-	for ((row=1;row<=3;row++))
+	count=0
+   for (( count=1; count<=$BOARD_SIZE ; count++ ))
 	do
-		column=1;
-		if [[ (${boardElements[$row$column]} =~ ${boardElements[$row$(($column+1))]}) && (${boardElements[$row$column]} =~ ${boardElements[$row$(($column+2))]}) ]]
-		then
-			echo 1;break;
-		fi
-	done
-}
-
-function columnCrossed(){
-   for ((column=1;column<=3;column++))
-   do
-      row=1;
-      if [[ (${boardElements[$row$column]} =~ ${boardElements[$(($row+1))$column]}) && (${boardElements[$row$column]} =~ ${boardElements[$(($row+2))$column]}) ]]
-      then
-         echo 1;break;
-		fi
+	if [ "${board[$count]}" == "0" ]
+   then
+   	printf  _" "
+   else
+   	printf ${board[$count]}" "
+   fi
+   if [ $(( $count % $ROW_SIZE )) -eq 0 ]
+   then
+   	echo
+   fi
    done
 }
 
-function diagonalCrossed(){
-	if [[ (${boardElements[11]} =~ ${boardElements[22]}) && (${boardElements[11]} =~ ${boardElements[33]}) ]]
-	then
-   	echo 1;break;
-	fi
-   if [[ (${boardElements[13]} =~ ${boardElements[22]}) && (${boardElements[22]} =~ ${boardElements[31]}) ]]
+function assignSymbol(){
+	randomVariable=$((RANDOM%2))
+   if [ $randomVariable -eq 0 ]
    then
-      echo 1;break;
+	   userSymbol="X"
+   else
+      compSymbol="X"
+	fi
+   echo "Your sign is "$userSymbol" and computer sign is "$compSymbol
+}
+
+function toss(){
+	randomVariable=$((RANDOM%2))
+   if [ $randomVariable -eq 0 ]
+   then
+   	echo User turn first
+      firstPlay=user
+   else
+   	echo Computer turn first
+      firstPlay=computer
    fi
 }
 
-function winCheck(){
-	row=`rowCrossed`;column=`columnCrossed`;diagonal=`diagonalCrossed`;
-	if [[ ($row -eq 1) || ($column -eq 1) || ($diagonal -eq 1) ]]
-	then
-		echo 1;
-	fi
+function validPositionChecker(){
+	if [ $1 -gt 0  -a $1 -le $BOARD_SIZE ]
+   then
+   	validator=true
+   fi
+   if [ "$validator" == "true" -a "${board[$1]}" == "0" ]
+   then
+   	board[$1]=$2
+   else
+      validator=false
+   fi
 }
 
-function tieCheck(){
-	for((row=1;row<=3;row++))
-	do
-		for((column=1;column<=3;column++))
-		do
-			if [[ ${boardElements[$row$column]} =~ ^([-])$ ]]
-			then
-				echo 1;break;
-			fi
-		done
+function computerPlays(){
+	while [ "$validator" == "false" ]
+   do
+	   number=$((RANDOM%9+1))
+      validPositionChecker $number $compSymbol
+   done
+   validator=false
+}
+
+function userPlays(){
+	while [ "$validator" == "false" ]
+   do
+   	read -p "Please enter the number between 1-9 where insert your $userSymbol in board " input;
+      validPositionChecker $input $userSymbol
+      if [ "$validator" == "false" ]
+      then
+			echo Input not accepted please try again
+      fi
 	done
+   validator=false
 }
 
-function checkPosition(){
-	if [[ ($1 -gt 0) && ($1 -le 3) && ($2 -gt 0) && ($2 -le 3) ]]
-	then
-		echo 1
-	else
-		echo 0
-	fi
+function diagonalEndingTopLeft(){
+	count=0
+   increase_by=$((ROW_SIZE+1))
+   for (( position=1; position <= $BOARD_SIZE; position+=$((ROW_SIZE+1)) ))
+   do
+   	if [ ${board[$position]} == $1 ]
+      then
+      	((count++))
+      fi
+	done
+   if [ $count -eq $ROW_SIZE ]
+   then
+   	winnerDisplay $1
+      quit=true
+   fi
 }
 
-function checkCondition(){
-	if [[ $1 -eq 1 ]]
-	then
-		echo "win";exit;
-	elif [[ $2 -eq 1 ]]
-	then
-		echo "tie";exit;
-	else
-		echo "change turn"
-	fi
+function diagonalEndingTopRight(){
+	count=0
+   for (( position=$ROW_SIZE; position <= $((BOARD_SIZE+1-ROW_SIZE)); position+=$((ROW_SIZE-1)) )) do
+		if [ ${board[$position]} == $1 ]
+      then
+      	((count++))
+      fi
+	done
+   if [ $count == $ROW_SIZE ]
+   then
+   	winnerDisplay $1
+      quit=true
+   fi
 }
 
-function playerInputCheck(){
-	displayBoard;
-	assignLetters $selectLetter;
-	read -p "enter the position in the matrix:" rowPosition columnPosition
-	checkValid=`checkPosition $rowPosition $columnPosition`
-	if [[ $checkValid -eq 1 ]]
-	then
-		boardElements[$rowPosition$columnPosition]=$playerLetter;
-		displayBoard;
-		checkCondition $winCheck $tieCheck $checkPOsition;
-	else
-		playerInputCheck;
-	fi
+function rowChecker(){
+	count=0
+   position=0
+   for (( row=0;row<$ROW_SIZE;row++ )) do
+   	count=0
+      for (( col=1; col<=$ROW_SIZE; col++ )) do
+	      position=$(($ROW_SIZE*row+col ))
+         if [ ${board[$position]} == $1 ]
+         then
+   	      (( count++ ))
+         fi
+      done
+      if [ $count -eq $ROW_SIZE ]
+      then
+      	winnerDisplay $1
+         break
+      fi
+	done
+   if [ $count -eq $ROW_SIZE ]
+   then
+   	quit=true
+   fi
 }
 
-resetBoard
-playerInputCheck
+function columnChecker(){
+	count=0
+   position=0
+   for (( col=1;col<=$ROW_SIZE;col++ )) do
+   	count=0
+      for (( row=0; row<=$ROW_SIZE; row++ )) do
+      	position=$(($ROW_SIZE*row+col ))
+         if [ "${board[$position]}" == "$1" ]
+         then
+         	(( count++ ))
+         fi
+      done
+      if [ $count -eq $ROW_SIZE ]
+      then
+      	winnerDisplay $1
+         break
+      fi
+	done
+   if [ $count -eq $ROW_SIZE ]
+   then
+   	quit=true
+   fi
+}
+
+function winnerCheck(){
+	diagonalEndingTopLeft $1
+   diagonalEndingTopRight $1
+   rowChecker $1
+   columnChecker $1
+}
+
+function winnerDisplay(){
+	if [ $1 == $userSymbol ]
+   then
+   	echo "User Wins the game"
+   else
+      echo "Computer wins the game"
+   fi
+}
+
+function ticTacToeApplication(){
+	resetBoard
+   assignSymbol
+   toss
+   while [ $quit == false ]
+   do
+   	validator=false
+      displayBoard
+      userPlays $firstPlay
+      validator=false
+      winnerCheck $userSymbol
+      computerPlays $firstPlay
+      winnerCheck $compSymbol
+	done
+   displayBoard
+}
+
+ticTacToeApplication
+
