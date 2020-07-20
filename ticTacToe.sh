@@ -100,11 +100,6 @@ function userPlays(){
    validator=false
 }
 
-function send_var(){
-	echo $1
-	winnerDisplay $1
-}
-
 function diagonalEndingTopLeft(){
 	if [ "$visited" == "false" ]
 	then
@@ -368,25 +363,55 @@ function winnerDisplay(){
       echo "Computer wins the game"
    fi
 }
+
+function gameEnds(){
+	for keys in ${board[@]}
+	do
+		if [ $values==0 ]
+		then
+			((count++))
+		fi
+		if [ $count -gt 0 ]
+		then
+			break
+		fi
+	done
+	if [ $count -eq 0 -a $quit == false  ]
+	then
+		echo "DRAW"
+		quit=true
+	fi
+}
+
+
 function ticTacToeApplication(){
 	resetBoard
-        assignSymbol
-        toss
-        while [ $quit == false ]
-        do
-                validator=false
-		visited=false
-                displayBoard
-                userPlays
+	assignSymbol
+	toss
+	while [ $quit == false ]
+	do
 		validator=false
 		visited=false
-                checkWin $userSymbol
-		plays
-                visited=false
-		checkWin $compSymbol
-        done
-        displayBoard
+		if [ $firstPlay == user ]
+		then
+			displayBoard
+			userPlays
+			validator=false
+			visited=false
+			checkWin $userSymbol
+			gameEnds
+			firstPlay=computer
+		fi
+		if [ $firstPlay == computer -a $quit == false ]
+		then
+			plays
+			visited=false
+			checkWin $compSymbol
+			gameEnds
+			firstPlay=user
+		fi
+	done
+	displayBoard
 }
 
 ticTacToeApplication
-
