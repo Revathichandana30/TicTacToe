@@ -100,6 +100,11 @@ function userPlays(){
    validator=false
 }
 
+function send_var(){
+	echo $1
+	winnerDisplay $1
+}
+
 function diagonalEndingTopLeft(){
 	if [ "$visited" == "false" ]
 	then
@@ -187,6 +192,27 @@ function rowChecker(){
    fi
 }
 
+function rowWin(){
+	count=0
+   position=0
+   for (( row=0; row<$ROW_SIZE; row++ )) do
+   	count=0
+      for (( col=1; col<=$ROW_SIZE; col++ )) do
+      	position=$(( ROW_SIZE*row+col ))
+         if [ ${board[$position]} == $1 ]
+         then
+         	(( count++ ))
+         fi
+      done
+      if [ $count -eq $ROW_SIZE ]
+      then
+	      winnerDisplay $1
+         quit=true
+         break
+      fi
+	done
+}
+
 function columnChecker(){
 	if [ "$visited" == "false" ]
 	then
@@ -218,6 +244,31 @@ function columnChecker(){
      	done
 	fi
 }
+
+function columnWin(){
+	if [ "$visited" == "false" ]
+   then
+   	count=0
+      position=0
+   	for (( col=1;col<=$ROW_SIZE;col++ )) do
+      	count=0
+         for (( row=0; row<=$ROW_SIZE; row++ )) do
+      	   position=$(($ROW_SIZE*row+col ))
+            if [ "${board[$position]}" == "$1" ]
+            then
+               (( count++ ))
+            fi
+         done
+         if [ $count -eq $ROW_SIZE ]
+         then
+            winnerDisplay $1
+            quit=true
+            break
+         fi
+      done
+	fi
+}
+
 function checkMoveToWin(){
 	diagonalEndingTopLeft $compSymbol
 	validPositionChecker $cell $compSymbol
@@ -240,17 +291,44 @@ function blockPlayer(){
 	validPositionChecker $cell $compSymbol
 }
 
+function check_If_Can_Win(){
+	rowChecker $compSymbol
+   validPositionChecker $cell $compSymbol
+   columnChecker $compSymbol
+   validPositionChecker $cell $compSymbol
+   diagonalEndingTopRight $compSymbol
+   validPositionChecker $cell $compSymbol
+   diagonalEndingTopLeft $compSymbol
+   validPositionChecker $cell $compSymbol
+}
+
+
+function corners(){
+	if [ $visited == "false" ]
+   then
+   	local key=1
+      validPositionChecker 1 $compSymbol
+      position=$((ROW_SIZE*0+ROW_SIZE))
+      validPositionChecker $key $compSymbol
+      position=$(( ROW_SIZE*$((ROW_SIZE-1)) + 1))
+      validPositionChecker $key $compSymbol
+      position=$(( ROW_SIZE*$((ROW_SIZE-1)) + ROW_SIZE))
+      validPositionChecker $key $compSymbol
+	fi
+}
+
 function checkForComp(){
-	validPositionChecker
-	blockPlayer
-	computerPlays
+	check_If_Can_Win
+   blockPlayer
+   corners
+   computerPlays
 }
 
 function winnerCheck(){
 	diagonalEndingTopLeft $1
    diagonalEndingTopRight $1
-   rowChecker $1
-   columnChecker $1
+   rowWin $1
+   columnWin $1
 }
 
 function winnerDisplay(){
