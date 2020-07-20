@@ -269,6 +269,15 @@ function columnWin(){
 	fi
 }
 
+function centre(){
+	if [ "$visited" == "false" ]
+   then
+   	mid=$((ROW_SIZE/2))
+      position=$(( $(( ROW_SIZE*mid)) + $((ROW_SIZE-mid)) ))
+      validPositionChecker $position $compSymbol
+	fi
+}
+
 function checkMoveToWin(){
 	diagonalEndingTopLeft $compSymbol
 	validPositionChecker $cell $compSymbol
@@ -317,18 +326,20 @@ function corners(){
 	fi
 }
 
-function checkForComp(){
-	check_If_Can_Win
-   blockPlayer
-   corners
-   computerPlays
-}
 
 function winnerCheck(){
 	diagonalEndingTopLeft $1
    diagonalEndingTopRight $1
    rowWin $1
    columnWin $1
+}
+
+function plays(){
+	winnerCheck
+	blockPlayer
+	corners
+	centre
+	computerPlays
 }
 
 function winnerDisplay(){
