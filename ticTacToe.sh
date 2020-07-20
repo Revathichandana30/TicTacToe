@@ -59,25 +59,32 @@ function toss(){
 }
 
 function validPositionChecker(){
-	if [ $1 -gt 0  -a $1 -le $BOARD_SIZE ]
-   then
-   	validator=true
-   fi
-   if [ "$validator" == "true" -a "${board[$1]}" == "0" ]
-   then
-   	board[$1]=$2
-   else
-      validator=false
-   fi
+	if [ "$visited" == "false" ]
+	then
+		if [ $1 -gt 0  -a $1 -le $BOARD_SIZE ]
+   	then
+   		validator=true
+   	fi
+   	if [ "$validator" == "true" -a "${board[$1]}" == "0" ]
+   	then
+   		board[$1]=$2
+			visited=true
+	   else
+   	   validator=false
+   	fi
+	fi
 }
 
 function computerPlays(){
-while [ "$validator" == "false" ]
-   do
-	   number=$((RANDOM%9+1))
-      validPositionChecker $number $compSymbol
-   done
-   validator=false
+	if [ "$visited" == "false" ]
+	then
+		while [ "$validator" == "false" ]
+   	do
+	   	number=$((RANDOM%9+1))
+      	validPositionChecker $number $compSymbol
+   	done
+   	validator=false
+	fi
 }
 
 function userPlays(){
@@ -219,10 +226,23 @@ function checkMoveToWin(){
 	rowChecker $compSymbol
 	validPositionChecker $cell $compSymbol
 	columnChecker $compSymbol
+	validPositionChecker $cell $compSymbol
+}
+
+function blockPlayer(){
+	diagonalEndingTopLeft $userSymbol
+  	validPositionChecker $cell $compSymbol
+  	diagonalEndingTopRight $userSymbol
+  	validPositionChecker $cell $compSymbol
+  	rowChecker $userSymbol
+  	validPositionChecker $cell $compSymbol
+  	columnChecker $userSymbol
+	validPositionChecker $cell $compSymbol
 }
 
 function checkForComp(){
 	validPositionChecker
+	blockPlayer
 	computerPlays
 }
 
