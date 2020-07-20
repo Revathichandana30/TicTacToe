@@ -278,67 +278,85 @@ function centre(){
 	fi
 }
 
-function checkMoveToWin(){
-	diagonalEndingTopLeft $compSymbol
+function block(){
+	rowChecker $userSymbol
 	validPositionChecker $cell $compSymbol
-	diagonalEndingTopRight $compSymbol
+	columnChecker $userSymbol
 	validPositionChecker $cell $compSymbol
+	diagonalEndingTopRight $userSymbol
+	validPositionChecker $cell $compSymbol
+	diagonalEndingTopLeft $userSymbol
+	validPositionChecker $cell $compSymbol
+
+}
+
+function corners(){
+	if [ $visited == "false" ]
+	then
+		local position=1
+		validPositionChecker 1 $compSymbol
+		position=$((ROW_SIZE*0+ROW_SIZE))
+		validPositionChecker $position $compSymbol
+		position=$(( ROW_SIZE*$((ROW_SIZE-1)) + 1))
+
+		validPositionChecker $position $compSymbol
+		position=$(( ROW_SIZE*$((ROW_SIZE-1)) + ROW_SIZE))
+		validPositionChecker $position $compSymbol
+	fi
+}
+
+function winnerChecker(){
 	rowChecker $compSymbol
 	validPositionChecker $cell $compSymbol
 	columnChecker $compSymbol
 	validPositionChecker $cell $compSymbol
-}
-
-function blockPlayer(){
-	diagonalEndingTopLeft $userSymbol
-  	validPositionChecker $cell $compSymbol
-  	diagonalEndingTopRight $userSymbol
-  	validPositionChecker $cell $compSymbol
-  	rowChecker $userSymbol
-  	validPositionChecker $cell $compSymbol
-  	columnChecker $userSymbol
+	diagonalEndingTopRight $compSymbol
+	validPositionChecker $cell $compSymbol
+	diagonalEndingTopLeft $compSymbol
 	validPositionChecker $cell $compSymbol
 }
 
-function check_If_Can_Win(){
-	rowChecker $compSymbol
-   validPositionChecker $cell $compSymbol
-   columnChecker $compSymbol
-   validPositionChecker $cell $compSymbol
-   diagonalEndingTopRight $compSymbol
-   validPositionChecker $cell $compSymbol
-   diagonalEndingTopLeft $compSymbol
-   validPositionChecker $cell $compSymbol
+function checkWin(){
+	diagonalEndingTopRight $1
+	diagonalEndingTopLeft $1
+	rowWin $1
+	columnWin $1
 }
 
 
-function corners(){
+function sides(){
 	if [ $visited == "false" ]
    then
-   	local key=1
-      validPositionChecker 1 $compSymbol
-      position=$((ROW_SIZE*0+ROW_SIZE))
-      validPositionChecker $key $compSymbol
-      position=$(( ROW_SIZE*$((ROW_SIZE-1)) + 1))
-      validPositionChecker $key $compSymbol
-      position=$(( ROW_SIZE*$((ROW_SIZE-1)) + ROW_SIZE))
-      validPositionChecker $key $compSymbol
+   	for (( side=1; side<=$ROW_SIZE; side++ ))
+   	do
+   		position=side
+   		validPositionChecker $position $compSymbol
+   	done
+  		for (( side=1; side<=$BOARD_SIZE; side+=$ROW_SIZE ))
+  		do
+  			position=side
+  			validPositionChecker $position $compSymbol
+  		done
+  		for (( side=$((BOARD_SIZE-ROW_SIZE+1)); side<=$BOARD_SIZE; side++ ))
+  		do
+  			position=side
+  			validPositionChecker $position $compSymbol
+ 		done
+  		for (( side=$ROW_SIZE; side<=$BOARD_SIZE; side++ ))
+  		do
+  			position=side
+  			validPositionChecker $position $compSymbol
+  		done
 	fi
 }
 
 
-function winnerCheck(){
-	diagonalEndingTopLeft $1
-   diagonalEndingTopRight $1
-   rowWin $1
-   columnWin $1
-}
-
 function plays(){
-	winnerCheck
-	blockPlayer
+	winnerChecker
+	block
 	corners
 	centre
+	sides
 	computerPlays
 }
 
@@ -350,25 +368,24 @@ function winnerDisplay(){
       echo "Computer wins the game"
    fi
 }
-
 function ticTacToeApplication(){
 	resetBoard
-   assignSymbol
-   toss
-   while [ $quit == false ]
-   do
+        assignSymbol
+        toss
+        while [ $quit == false ]
+        do
+                validator=false
+		visited=false
+                displayBoard
+                userPlays
 		validator=false
 		visited=false
-      displayBoard
-      userPlays
-		validator=false
-		visited=false
-      winnerCheck $userSymbol
-      visited=false
-		computerPlays
-      winnerCheck $compSymbol
-	done
-   displayBoard
+                checkWin $userSymbol
+		plays
+                visited=false
+		checkWin $compSymbol
+        done
+        displayBoard
 }
 
 ticTacToeApplication
